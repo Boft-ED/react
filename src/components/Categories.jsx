@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import React from 'react'
 
-function Categories() {
-    const [active, setActive] = useState(0)
+// кладем в функцию Categories стейт из родителя и функцию меняющую состояние 
+function Categories({ value, onClickCategory }) {
 
     const categories = [
         'Все',
@@ -15,12 +15,12 @@ function Categories() {
     return (
         <div className="categories">
             <ul>
-                {categories.map((value, i) => (
-                    <li key={i} onClick={() => setActive(i)} className={active === i ? 'active' : ''}>{value}</li>
+                {categories.map((categoryName, i) => (
+                    <li key={i} onClick={() => onClickCategory(i)} className={value === i ? 'active' : ''}>{categoryName}</li>
                 ))}
             </ul>
         </div>
-    )
-}
+    );
+};
 
 export default Categories;
