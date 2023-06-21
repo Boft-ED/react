@@ -18,6 +18,7 @@ const Home = () => {
                 setItems(arr); // записываем в функцию данные, полученные с бека
                 setisLoading(false);
             });
+        window.scrollTo(0, 0);
     }, []);
     return (
         <div className="container">
