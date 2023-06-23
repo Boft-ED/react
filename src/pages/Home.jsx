@@ -5,11 +5,11 @@ import Sort from '../components/Sort';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/skeleton';
 
-const Home = () => {
+const Home = ({ searchValue }) => {
     const [items, setItems] = useState([]);
     const [isloading, setisLoading] = useState(true);
     // хук, который предназначен, чтобы выполнить код после отрисовки, тк есть жизненный цикл компонента
-    const [categoryId, setCategoryId] = useState(0)
+    const [categoryId, setCategoryId] = useState(0) // родителские стэйты
     const [sort, setSort] = useState({
         name: 'популярности',
         sortProperty: 'raiting'
@@ -34,21 +34,27 @@ const Home = () => {
         window.scrollTo(0, 0);
     }, [categoryId, sort]); // зависимость от которой будет делаться запрос, если один из параметров изменится 
 
-
+    const pizzas = items.filter((obj) => {
+        if (obj.title.toLowerCase().includes(searchValue.toLowerCase())) {
+            return true;
+        }
+        return false;
+    }).map((obj) => <PizzaBlock key={obj.id}{...obj} />);
+    const sceletons = [...new Array(6)].map((_, index) => <Skeleton key={index} />);
     return (
         <div className="container">
             <div className="content__top">
+                {/* в компоненты отдаем стэйты родителя  */}
                 <Categories value={categoryId} onClickCategory={(id) => setCategoryId(id)} />
                 <Sort value={sort} onClickSort={(id) => setSort(id)} />
             </div>
             <h2 className="content__title">Все пиццы</h2>
             <div className="content__items">
-                {isloading ? [...new Array(6)].map((_, index) => <Skeleton key={index} />)
-                    : items.map((obj) => <PizzaBlock key={obj.id}{...obj} />)}
-
-                {/* если идет загрузка, то мы создаем фейк массив из 6 состовляющих и превращаем его в массив скелетонов, а когда условие ложно, то загрузка кончилась и мы отрисовываем новый массив с полученными данными от бека */}
+                {isloading ? sceletons : pizzas}
             </div>
+            {/* если идет загрузка, то мы создаем фейк массив из 6 состовляющих и превращаем его в массив скелетонов, а когда условие ложно, то загрузка кончилась и мы отрисовываем новый массив с полученными данными от бека */}
         </div>
+
     );
 };
 
