@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { SearchContext } from '../../App';
 
 import styles from './Search.module.scss';
 
-const Search = ({ searchValue, setSearchValue }) => {
+const Search = () => {
+    const { searchValue, setSearchValue } = useContext(SearchContext);
+    // c помощью хука useContext мы вытаскиваем содержимое пременной SearchContext исходя из прицнипа работы контекста. это как обработчик событий, он слушает измнения контекста
     return (
         <div className={styles.root}>
             {/* сделали компонент контролируемый, благодаря контексту в реакте  */}

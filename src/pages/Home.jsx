@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 
 
 import Categories from '../components/Categories';
@@ -6,8 +6,10 @@ import Sort from '../components/Sort';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/skeleton';
 import Pagination from '../components/Pagination';
+import { SearchContext } from '../App';
 
-const Home = ({ searchValue }) => {
+const Home = () => {
+    const { searchValue } = useContext(SearchContext); // мы просим с помощью хука следить за изменением контекста => если контекст меняется => происходит перерисовка 
     const [items, setItems] = useState([]);
     const [isloading, setisLoading] = useState(true);
     // хук, который предназначен, чтобы выполнить код после отрисовки, тк есть жизненный цикл компонента
