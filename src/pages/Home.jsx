@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-
+import { useSelector, useDispatch } from 'react-redux';
 
 import Categories from '../components/Categories';
 import Sort from '../components/Sort';
@@ -7,19 +7,24 @@ import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/skeleton';
 import Pagination from '../components/Pagination';
 import { SearchContext } from '../App';
+// вытаскиваем метод из слайса
+import { setCategoryId } from '../redux/slices/filterSlice';
 
 const Home = () => {
+    // вытащили categoryId из изначального стейта 
+    const dispatch = useDispatch();
+    const { categoryId, sort } = useSelector(state => state.filter);
+
     const { searchValue } = useContext(SearchContext); // мы просим с помощью хука следить за изменением контекста => если контекст меняется => происходит перерисовка 
     const [items, setItems] = useState([]);
     const [isloading, setisLoading] = useState(true);
     // хук, который предназначен, чтобы выполнить код после отрисовки, тк есть жизненный цикл компонента
-    const [categoryId, setCategoryId] = useState(0) // родителские стэйты
     const [pagePagination, setPagePagination] = useState(1);
-    const [sort, setSort] = useState({
-        name: 'популярности',
-        sortProperty: 'raiting'
-    }); // изначальные данные для сортировки 
 
+    // диспатчем передаем id обратно в reducers 
+    const onChangeCategory = (id) => {
+        dispatch(setCategoryId(id));
+    }
 
     useEffect(() => {
         setisLoading(true);
@@ -46,8 +51,8 @@ const Home = () => {
         <div className="container">
             <div className="content__top">
                 {/* в компоненты отдаем стэйты родителя  */}
-                <Categories value={categoryId} onClickCategory={(id) => setCategoryId(id)} />
-                <Sort value={sort} onClickSort={(id) => setSort(id)} />
+                <Categories value={categoryId} onClickCategory={onChangeCategory} />
+                <Sort />
             </div>
             <h2 className="content__title">Все пиццы</h2>
             <div className="content__items">
