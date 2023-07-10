@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 // инициализировали исходное состояние
 const initialState = {
     categoryId: 0,
+    currentPage: 1,
     sort: {
         name: 'популярности',
         sortProperty: 'raiting'
@@ -19,11 +20,14 @@ const filterSlice = createSlice({
         },
         setSort(state, action) {
             state.sort = action.payload;
+        },
+        setCurrentPage(state, action) {
+            state.currentPage = action.payload;
         }
     },
 });
 
-export const { setCategoryId, setSort } = filterSlice.actions;
+export const { setCategoryId, setSort, setCurrentPage } = filterSlice.actions;
 
 // мы вытаскиваем из обьекта actions свойство setCategoryId и делаем его константой 
 
