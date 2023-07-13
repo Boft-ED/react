@@ -1,20 +1,25 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
+import qs from 'qs';
 
 import Categories from '../components/Categories';
-import Sort from '../components/Sort';
+import Sort, { list } from '../components/Sort';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/skeleton';
 import Pagination from '../components/Pagination';
 
 import { SearchContext } from '../App';
 // вытаскиваем метод из слайса
-import { setCategoryId, setCurrentPage } from '../redux/slices/filterSlice';
+import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-    // вытащили categoryId из изначального стейта 
+    const navigate = useNavigate();
     const dispatch = useDispatch();
+    const isSearch = useRef(false);
+    const isMounted = useRef(false);
+    // вытащили categoryId из изначального стейта 
     const { categoryId, sort, currentPage } = useSelector(state => state.filter);
 
     const { searchValue } = useContext(SearchContext); // мы просим с помощью хука следить за изменением контекста => если контекст меняется => происходит перерисовка 
@@ -31,7 +36,7 @@ const Home = () => {
         dispatch(setCurrentPage(number));
     };
 
-    useEffect(() => {
+    const fetchPizzas = () => {
         setisLoading(true);
 
         const sortBy = sort.sortProperty.replace('-', '');
@@ -52,7 +57,46 @@ const Home = () => {
             setisLoading(false);
         });
 
+    }
+
+    // если не было первого рендера, то не нужно вшивать в адрессную строчку параметры
+    useEffect(() => {
+        if (isMounted.current) {
+            const queryString = qs.stringify({
+                sortProperty: sort.sortProperty,
+                categoryId,
+                currentPage
+            });
+            navigate(`?${queryString}`);
+        }
+        isMounted.current = true;
+    }, [categoryId, sort, currentPage])
+
+    // если что-то поменялось в поисковой строчке, то мы будем вшивать в редакс параметры поиска. сначала парсим параметры, превращаемя в обьект и передаем в редакс
+    useEffect(() => {
+        if (window.location.search) {
+            const params = qs.parse(window.location.search.substring(1));
+            const sort = list.find((obj) => obj.sortProperty === params.sortProperty);
+
+            dispatch(
+                setFilters({
+                    ...params,
+                    sort
+                })
+            );
+            isSearch.current = true;
+        }
+    }, [])
+
+
+    // если был первый рендер, то запрашиваем пиццы
+    useEffect(() => {
         window.scrollTo(0, 0);
+        if (!isSearch.current) {
+            fetchPizzas();
+        }
+
+        isSearch.current = false;
     }, [categoryId, sort, searchValue, currentPage]); // зависимость от которой будет делаться запрос, если один из параметров изменится 
 
     const pizzas = items.map((obj) => <PizzaBlock key={obj.id}{...obj} />);
