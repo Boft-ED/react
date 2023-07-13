@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 // кладем в функцию Categories стейт из родителя и функцию меняющую состояние 
 function Categories({ value, onClickCategory }) {

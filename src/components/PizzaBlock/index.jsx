@@ -1,14 +1,29 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from 'react-redux';
 
-function PizzaBlock({ title, price, imageUrl, sizes, types }) { // деструктуризация 
-    const [pizzaCount, setPizzaCount] = useState(0); // первый аргумент записывает в себя изменения, которые происходят во 2 аргументе и 2 аргумент заставляет перерисоваться компонент 
-    const onClickAdd = () => {
-        setPizzaCount(pizzaCount + 1)
-    };
+import { addItem } from "../../redux/slices/cartSlice";
 
-    const typePizza = ['традицонное', 'тонкое'];
+const typePizza = ['традицонное', 'тонкое'];
+
+function PizzaBlock({ id, title, price, imageUrl, sizes, types }) { // деструктуризация 
+    const dispatch = useDispatch();
+    const cartItem = useSelector(state => state.cart.items.find((obj) => obj.id === id));
     const [activeType, setActiveType] = useState(0);
     const [activeSize, setActiveSize] = useState(0);
+
+    const addedCount = cartItem ? cartItem.count : 0;
+
+    const onClickAdd = () => {
+        const item = {
+            id,
+            title,
+            price,
+            imageUrl,
+            type: typePizza[activeType],
+            size: sizes[activeSize],
+        };
+        dispatch(addItem(item));
+    };
 
     return (
         <div className="pizza-block-wrapper">
@@ -47,7 +62,7 @@ function PizzaBlock({ title, price, imageUrl, sizes, types }) { // дестру�
                             />
                         </svg>
                         <span>Добавить</span>
-                        <i>{pizzaCount}</i>
+                        {addedCount > 0 && <i>{addedCount}</i>}
                     </button>
                 </div>
             </div>
