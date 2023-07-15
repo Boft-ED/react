@@ -1,6 +1,5 @@
 import { useEffect, useState, useContext, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import axios from 'axios';
 import qs from 'qs';
 
 import Categories from '../components/Categories';
@@ -13,6 +12,8 @@ import { SearchContext } from '../App';
 // вытаскиваем метод из слайса
 import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
 import { useNavigate } from 'react-router-dom';
+import { getPizzas } from '../redux/slices/pizzasSlice';
+
 
 const Home = () => {
     const navigate = useNavigate();
@@ -20,12 +21,10 @@ const Home = () => {
     const isSearch = useRef(false);
     const isMounted = useRef(false);
     // вытащили categoryId из изначального стейта 
+    const { items, status } = useSelector((state) => state.pizza);
     const { categoryId, sort, currentPage } = useSelector(state => state.filter);
 
     const { searchValue } = useContext(SearchContext); // мы просим с помощью хука следить за изменением контекста => если контекст меняется => происходит перерисовка 
-    const [items, setItems] = useState([]);
-    const [isloading, setisLoading] = useState(true);
-    // хук, который предназначен, чтобы выполнить код после отрисовки, тк есть жизненный цикл компонента
 
     // диспатчем передаем id обратно в reducers 
     const onChangeCategory = (id) => {
@@ -36,8 +35,7 @@ const Home = () => {
         dispatch(setCurrentPage(number));
     };
 
-    const fetchPizzas = () => {
-        setisLoading(true);
+    const getPizzas = async () => {
 
         const sortBy = sort.sortProperty.replace('-', '');
         const order = sort.sortProperty.includes('-') ? 'asc' : 'desc';
@@ -52,12 +50,19 @@ const Home = () => {
         //         setItems(arr); // записываем в функцию данные, полученные с бека
         //         setisLoading(false);
         //     });
-        axios.get(`https://64920b3c2f2c7ee6c2c9570b.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`).then(res => {
-            setItems(res.data); // записываем в функцию данные, полученные с бека
-            setisLoading(false);
-        });
+        // await axios.get(`https://64920b3c2f2c7ee6c2c9570b.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`).then(res => {
+        //     setItems(res.data); // записываем в функцию данные, полученные с бека
+        //     setisLoading(false);
+        // });
 
-    }
+        // сделали последовательное выполнение кода(отложили) 
+        dispatch(getPizzas({
+            sortBy,
+            order,
+            category,
+            search,
+        }));
+    };
 
     // если не было первого рендера, то не нужно вшивать в адрессную строчку параметры
     useEffect(() => {
@@ -88,12 +93,11 @@ const Home = () => {
         }
     }, [])
 
-
     // если был первый рендер, то запрашиваем пиццы
     useEffect(() => {
         window.scrollTo(0, 0);
         if (!isSearch.current) {
-            fetchPizzas();
+            getPizzas();
         }
 
         isSearch.current = false;
@@ -110,7 +114,7 @@ const Home = () => {
             </div>
             <h2 className="content__title">Все пиццы</h2>
             <div className="content__items">
-                {isloading ? sceletons : pizzas}
+                {status === 'loading' ? sceletons : pizzas}
             </div>
             {/* если идет загрузка, то мы создаем фейк массив из 6 состовляющих и превращаем его в массив скелетонов, а когда условие ложно, то загрузка кончилась и мы отрисовываем новый массив с полученными данными от бека */}
             <Pagination currentPage={currentPage} onChangePage={onChangePage} />
